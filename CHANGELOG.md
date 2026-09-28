@@ -6,6 +6,13 @@
 
 ### Fixed
 
+- `dirichlet` joins the bin-edge count rule that `continuity`-backed ladders
+  already obey: six declared `z_frac_*` require exactly eight `bin_edges_gyr`,
+  and `resolve_sfh` now runs `validate_bin_edges_gyr` itself so direct calls
+  cannot bypass the rule the build path enforces. `dirichlet()` refuses unknown
+  `z_frac_*` keywords naming the accepted range instead of ignoring them
+  (#2479, #2503).
+
 - The eline fitted-mode test mocks now attach `Spectroscopy` through
   `observation.spectroscopy` instead of the private `_spectroscopy_config` that #2455
   stopped reading. The loss builder's channel-scale probe drew its reference
