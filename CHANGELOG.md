@@ -55,6 +55,14 @@
   `Fitter.__init__` — before `self._fixed_values`/`self._params_override`
   exist — no longer silently falls back to the spec's own declared value.
 - Student-t noise Hamiltonian now includes the dof-dependent normalisation, so a free `noise_dof` is sampled under a correctly normalised density (#2525).
+- **Breaking**: `delayed_bq`, `periodic` and `buat08` now evaluate CIGALE's formulas
+  in time since formation (T = age − t_lookback), as `sfhdelayed`/`sfh2exp` and #549's
+  `dpl`/`lognormal` do; previously they read CIGALE's forward time as lookback, giving
+  the time-reversed history (a "recent" delayed_bq burst formed at the oldest end with
+  SFR(now) = 0; periodic bursts rose slowly and cut off at their onset; buat08 SFR → 0
+  today). `periodic` no longer stops after 100 bursts (#2515). `buat08` gains
+  `sfh_buat08_age_gyr` (default: age of the universe). Every fit using these three SFHs
+  changes meaning; re-fit before comparing (#2514, #2515).
 
 - `dirichlet` joins the bin-edge count rule that `continuity`-backed ladders
   already obey: six declared `z_frac_*` require exactly eight `bin_edges_gyr`,
