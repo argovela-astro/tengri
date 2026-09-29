@@ -10,6 +10,10 @@
 
 ### Fixed
 
+- `double_powerlaw` and `delayed_tau` now evaluate their shapes in cosmic time
+  since formation (T = age − t_lookback) and take a required keyword-only `age`;
+  both previously treated lookback time as cosmic time and returned mirror-imaged
+  histories (#2524).
 - `profile_mass` now reaches six backends it had been silently skipping:
   `nss`, `mcmc_raytrace`, `mcmc_ess`, `pathfinder`, `vi_fullrank` and
   `vi_meanfield` were absent from `PROFILE_MASS_BACKENDS`, so
