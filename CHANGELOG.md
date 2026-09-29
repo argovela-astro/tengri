@@ -6,6 +6,54 @@
 
 ### Fixed
 
+- `profile_mass` now reaches six backends it had been silently skipping:
+  `nss`, `mcmc_raytrace`, `mcmc_ess`, `pathfinder`, `vi_fullrank` and
+  `vi_meanfield` were absent from `PROFILE_MASS_BACKENDS`, so
+  `resolve_profile_mass_for_method` disabled profiling before they ran. The
+  clearest case is `nss`: `build_profiled_loglikelihood_fn` was written for
+  nested sampling and says so in its docstring, but the omission made it
+  unreachable, so every NSS evidence run scored its live points at the mass
+  placeholder instead of the marginal likelihood — exactly what that docstring
+  warns about. Each of the six was audited to its call site into the Fitter's
+  loss; the set goes 16 to 22 of 29 registered backends, the remaining 7 being
+  the NIFTy and native-VI backends that build their objective from the model
+  and spec directly. `tests/inference/test_profile_mass_backend_coverage.py`
+  now pins a *partition* (registry == allowlist | excluded-with-reason) rather
+  than a membership list, so a newly registered backend fails the test until
+  someone classifies it; a membership list would have stayed green through all
+  six omissions.
+- The `profile_mass` linearity guard reports which of **three** kinds it
+  measured — `proportional`, `affine` or `nonlinear` — where it previously
+  answered only proportional-or-not. The distinction is load-bearing:
+  `chi2(M)` stays exactly quadratic for an affine prediction
+  `M f(theta) + g(theta)`, so such a model is marginalizable once the offset is
+  known, while a nonlinear one never is. The extra mass evaluation that
+  separates the two is taken only on the refusal branch, so the proportional
+  fast path (every SFH that renormalizes to the mass, hence eight of the nine
+  shipped recipes) is unchanged.
+- The linearity refusal no longer misdiagnoses. It asserted that an order-1
+  deviation "indicates a mass-independent additive component such as an AGN
+  continuum" on every model; measured on a `dense_basis` photometry fit with no
+  AGN block, the deviation is order 1 and the cause is a mass-dependent SFH
+  *shape* (`_build_quantile_points` builds its GP knots from
+  `sfr_inst*age/M`, making `log_total_mass` a shape parameter rather than an
+  amplitude). #2374 improved the wording without covering that case. The
+  message now names the measured kind and names an additive component only
+  when the model carries one. An audit of every registered SFH found
+  `dense_basis` is the only one that leaks the mass into its shape: the other
+  20 measurable ones sit at 9e-15 to 1.3e-14, the roundoff floor, via
+  `mean_sfh._renormalize_to_mass`. The linearity probe now evaluates at the
+  fit's own fixed values (including a `params_override` redshift) and lets
+  model-evaluation errors propagate instead of logging them as invalid thetas.
+  The same fix now covers the whole guard chain rather than just that one
+  evaluation loop: the affine-vs-nonlinear retest's own third-mass evaluation
+  (`_classify_nonproportional`) and the `profile_mass="auto"` guard-check
+  dispatch (`configure_profile_mass`) no longer fold a model-evaluation error
+  into a silent `"nonlinear"` classification or `"auto-disabled"` reason
+  either, and the probe's fixed-values resolution takes the raw
+  `params_override` argument directly, so a call reached during
+  `Fitter.__init__` — before `self._fixed_values`/`self._params_override`
+  exist — no longer silently falls back to the spec's own declared value.
 - Student-t noise Hamiltonian now includes the dof-dependent normalisation, so a free `noise_dof` is sampled under a correctly normalised density (#2525).
 
 - `dirichlet` joins the bin-edge count rule that `continuity`-backed ladders
