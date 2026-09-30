@@ -197,6 +197,17 @@
   attributes the Madau+1995 residual to line-wavelength conventions at the
   Lyman-series edges (vacuum 1025.72 Å vs rounded 1026 Å; 14.6% at z=3,
   21.1% at z=5, single node). The parity matrix's M4 bagpipes arm is closed.
+- `PLANCK18` includes radiation and massive-neutrino densities; D_L and age(z) match
+  astropy's Planck18 to < 1e-4 (previously +0.09 % at z=1, +0.21 % at z=10 in D_L)
+  (#2517). Every named cosmology (`PLANCK18`, `PLANCK15`, `WMAP5`) states its own
+  published Tcmb0/Neff/m_nu explicitly (`WMAP5`: Tcmb0=2.725 K, Neff=3.04, massless
+  neutrinos), matching astropy's Planck18/Planck15/WMAP5 to rtol 1e-6; `CosmoParams`'
+  field defaults are radiation-free (Tcmb0=0.0), so a user-built `CosmoParams(Om0=...,
+  w0=..., wa=..., h=...)` is unaffected by this fix unless it passes `Tcmb0` explicitly.
+  D_L and age(z), and their gradients with respect to z, Om0, and h, are all finite in
+  float32. `luminosity_distance_mpc` is exactly 0 at z = 0 (`distance_modulus` keeps
+  the 10 pc convention at its own log10), and the age of the universe that the SFH
+  age defaults derive from follows the same cosmology: 13.787 Gyr, where it was 13.81.
 - Unknown-name errors recognize citation keys and name the registry entry they
   cite (#2429): when a user provides a citation key (e.g., `charlot_fall2000`)
   instead of a registry name (e.g., `power_law`), the error message now
