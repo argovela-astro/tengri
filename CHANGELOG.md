@@ -478,6 +478,12 @@
   to 2.079, matching an independent BAGPIPES evaluation (2.082) to < 0.5%
   precision versus ~10% prior miss.
 
+- Student-t and Gaussian noise energies now share one convention: both return
+  the negative log-density up to a parameter-independent constant, with the
+  Student-t branch tending to the Gaussian branch as dof → ∞. A fit at fixed
+  dof is unchanged; comparing evidence across noise families no longer carries
+  an offset of n·½·log(2π) (#2560).
+
 ### Fixed
 
 - SKIRTOR grid caches are keyed on the process float dtype, so a float32
