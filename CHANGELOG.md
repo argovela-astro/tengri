@@ -18,6 +18,11 @@
 
 ### Fixed
 
+- The dense-mass step-size stability probe (#1999) now also runs after
+  adaptation in the dynamic-HMC backend and in `fit_batch`'s shared window
+  adaptation, so those paths refuse a step above the metric's stability limit
+  like the single-galaxy NUTS/HMC paths; the fused-scan paths remain the design
+  item in #2157 (Refs #2157).
 - A model on an SSP that includes nebular emission (a wNE grid) with a radio block carries one
   thermal free-free term at every wavelength (#2574): the SSP flux already holds the nebular
   continuum up to the SSP grid edge (1 cm for `ssp_prsc_miles_chabrier_wNE`), and the radio
