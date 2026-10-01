@@ -542,6 +542,21 @@
   dof is unchanged; comparing evidence across noise families no longer carries
   an offset of n·½·log(2π) (#2560).
 
+- Nebular backends' parameter reach. `neb_logU` (Cloudy, CB19 and both
+  MAPPINGS backends) and `neb_logZ_gas` (Cloudy) are now narrowed to the
+  vendored grid's axis at build time and warn when a value cannot be
+  narrowed away from it, instead of silently clipping onto a dead edge node
+  with an exactly-zero gradient (#2460). `CueBackend`'s low-level path
+  (`ssp_weights=None`) now threads `neb_logZ_gas` into `gas_logz` instead of
+  silently forcing solar metallicity (#2437). `neb={'type': 'cloudy'}` with
+  no explicit `grid` now prefers the packaged grid whose isochrone matches
+  the SSP, warning when it falls back to a mismatched sole grid and
+  refusing to guess among several mismatched ones; the resolved path is
+  logged at INFO (#2426). Cue's reproduction markdown, READMEs, validation scripts and
+  `cue.py` cite Cloudy 22.00 (Li et al. 2025) instead of "c17+"; three
+  code-cell labels and the rendered `docs/reproduction` copies refresh with the
+  next executing re-render (part of #2555).
+
 ### Fixed
 
 - SKIRTOR grid caches are keyed on the process float dtype, so a float32
