@@ -6,6 +6,9 @@
 
 - `dust_emission={'diffuse_screen': True}` passes the re-emitted IR dust emission once through the diffuse dust screen (single pass; the IR energy absorbed on the way out is removed, not re-emitted); `log_L_ir_emergent` reports the escaping IR luminosity while `L_ir`/`L_absorbed` keep the absorbed budget. Off by default (#2533).
 
+- `lsf_scale`: a free multiplicative scale on the instrument LSF resolution
+  (default `Fixed(1.0)`, prior `Uniform(0.8, 1.2)`), applied to both the
+  stellar-continuum and emission-line spectroscopy kernels (#2526).
 - The spine sync script gains a `--check` mode that diffs the normalized twins against the committed files and the smoke job runs it, so a stale docs/spine twin fails CI instead of shipping (#2134).
 - `predict_line_fluxes` and `measure_line_fluxes` now apply the model's configured IGM transmission, profile-averaged over the line's Gaussian width in observed wavelength, matching the same `igm_absorption` dispatch the spectrum/photometry channels already use. Previously the line-flux surfaces read a rest-frame catalog and divided by `4 pi d_L^2` directly, so a line at a redshift where the Lyman forest bites (e.g. Ly-alpha at z >~ 2) came out brighter than the same galaxy's own spectrum. `igm={'type': 'none'}` (or an absent IGM component) leaves line fluxes unchanged; every registered mean-IGM model is supported (#2520).
 - A declared `line_flux_scaling` nuisance parameter (default `Fixed(1.0)`, free via `spec.merge_observation_params(line_flux_scaling=LogNormal(mu=0.0, sigma=0.05))`) multiplies every predicted flux of the `Observation.line_fluxes` channel before the likelihood comparison, absorbing an aperture / absolute-flux-calibration mismatch between that channel and the rest of a joint fit. Fixed at 1.0 by default, so an existing fit is unaffected unless a user opts in; `profile_mass=True` refuses when it is free alongside a profiled line-flux channel, since the two amplitudes are otherwise degenerate (#2527).
@@ -424,6 +427,16 @@
   dead probe read of `_spectroscopy_config` in `Fitter._init_emission_lines`
   has been removed. (#2191)
 
+- The default Gaussian LSF path now subtracts the loaded SSP library's own
+  per-wavelength resolution instead of a flat scalar, and stops applying
+  that subtraction and the galaxy's velocity dispersion to nebular/shock
+  emission lines, which keep only the instrument LSF, matching Prospector's
+  convention (#2518, #2519). `SSPData` gains `ssp_resolution_kms` from
+  FSPS's own per-node tables (MILES σ_v ≈ 92→43 km/s; C3K σ_v ≈ 42.4 km/s;
+  `SSP_LIBRARY_RESOLUTIONS["c3k"]` corrected 15.0 → 42.4 km/s), and warns
+  instead of silently clamping wherever the instrument is sharper than the
+  library. Every path that predicts a spectrum from the model applies the same
+  kernel rule through one function.
 - Unknown key validation now precedes grid-file resolution for CLOUDY nebular
   configuration (#2328): when `neb={'type': 'cloudy'}` with no 'grid' key is
   supplied and no CLOUDY grid is on disk, a typo in the group was silently
