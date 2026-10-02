@@ -116,6 +116,12 @@
 - Meiksin (2006) IGM: every Lyman-series optical depth (n = 2–30) is evaluated
   at its absorber redshift z_n = λ_obs/λ_n − 1, so the transmission blueward
   of Lyβ follows the paper's Table 2 (#2585).
+- The BAGPIPES reproduction stores each BC03+MILES node's absolute log10 Z (BAGPIPES's
+  metallicity grid is in units of Z☉ = 0.02) and pins the cross-code comparison at one
+  absolute Z (`met_logzsol = log10(0.02) − log10(0.0142)`) in every stellar-metallicity
+  request, metallicity sweeps included, while gas metallicity is matched solar-scaled
+  (`neb_logZ_gas = log10(z)`); its L_λ↔L_ν conversion uses tengri's speed of light; the
+  validator's birth-cloud control states the `eta` it corresponds to (#2616).
 - The composable AGN precompute LUT's accuracy is now measured and pinned
   against the exact recipe evaluation (#2288). `interp_nd_triweight` is a
   kernel smoother, not an interpolant, so node parity is not a valid invariant
