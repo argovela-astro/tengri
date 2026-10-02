@@ -3,6 +3,18 @@
 ### Fixed
 
 - Direct calls to the composable AGN runner (`compose_l_nu`) overflowed float32: the reference-L_bol factoring (#1206) lived only in `AGNSEDComponent`, so the runner exponentiated the true `agn_log_lbol` inside the blocks. The factoring lives in `components/agn/_lbol_reference.py` and is called by the runner and by the component's monolithic branch, so the direct call and the `SEDModel` path share it. float64 outputs on the `SEDModel` path are bit-identical (measured). (#2321)
+
+- CI compile caches fit the GitHub Actions quota: pull request runs no longer save
+  JAX compile cache entries to the repo's shared cache (reducing PR-scoped bloat from
+  6 GB per push), and per-job `TENGRI_JAX_CACHE_MAX_GB` caps bind each job's entries
+  so their union fits GitHub's 10 GB repository cache limit (sizes from warm working
+  sets: contract 1.55, components 0.6, regression-a 1.0, regression-b1/b2 0.7/1.1,
+  regression-c 0.05, regression-d 0.65, physics 0.28, slow inference parts 1/2/3
+  and integration 0.2/0.2/0.65/0.5, components-unit-regression-contract-physics 0.12,
+  agn-wildcard-liveness 0.15, crossval 0.05, notebooks 0.25 GiB). Contract and
+  regression-a timeout budgets now cover a cold cache: 90 and 85 minutes respectively,
+  without renaming the required checks (#2549).
+
 ### Added
 
 - The vmapped catalog MCMC engine now profiles the stellar mass: `profile_mass="auto"` applies to `CatalogFitter`'s native NUTS/HMC path, and the analytically marginalized mass is reinserted per galaxy (via `mass_profile.reinsert_profiled_mass`, against that galaxy's own channels) before summaries are attached — 4.9x on a 6-galaxy photometry catalog. Previously the vectorized engines pinned `profile_mass=False` (#2254); a positional-array `init_from` still stands profiling down, since its width is the un-profiled dimension (#2423).
