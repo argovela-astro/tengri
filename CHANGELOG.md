@@ -32,6 +32,8 @@
 
 ### Fixed
 
+- `bins` and `bins_continuity` metallicity histories take their bin count from `met_bin_edges_log_yr` — a one-bin ladder gives the base metallicity at every age (both modes), a three-bin ladder gives three metallicities; a ladder with more bins than the six declared parameters, or a `bin_<i>` / `d_log_z_<i>` beyond the ladder, is refused at build time (#2600).
+
 - `read_catalog`: a negative error marks an upper limit at the signed flux (any flux sign);
   a flux or error below −9990, or an error of zero, masks the band and one `UserWarning`
   per column lists the masked rows; a negative flux with a positive error is a detection
