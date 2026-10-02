@@ -63,6 +63,12 @@
   like the single-galaxy NUTS/HMC paths; the fused-scan paths remain the design
   item in #2157 (Refs #2157).
 
+- `neb_logU` is documented as Cue's inner-face ionization parameter at R = 10^19 cm, not the
+  Synthesizer ionization parameter, which is three times the Strömgren-radius U_S of Gutkin et al.
+  (2016, eq. 7), with the mapping between the two at n_H = 100 cm⁻³; the FSPS CLOUDY grid converter
+  describes its metallicity axis as log10(Z / Z_sun) as tabulated by FSPS, not "absolute
+  metallicity" (#2632, #2633).
+
 - The emission-line catalog's [O I] 6300 entry is the vacuum wavelength (6302.05 Å, the 6300.304 Å
   air value converted with the IAU standard relation), and the hard-coded line-wavelength tables
   (Richardson NLR template, shock fallback lines, `KEY_LINES`, `DESI_LINES`, plotting
