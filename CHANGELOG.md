@@ -42,6 +42,8 @@
   with its signed value; the `-1` lower-limit flag is the ingest path's (`catalog_ingest`),
   never this reader's (#2586).
 
+- The surviving stellar mass is `M_formed · Σ_age Σ_Z w(age, Z) · m_rem(age, Z)` over the joint weights the spectrum uses — each (age, Z) node at its own remaining-mass fraction, for every metallicity history; `predict_sfh_quantities` reads the component's published `log_mstar_surviving` (#2613).
+
 - The dense-mass step-size stability probe (#1999) now also runs after
   adaptation in the dynamic-HMC backend and in `fit_batch`'s shared window
   adaptation, so those paths refuse a step above the metric's stability limit
