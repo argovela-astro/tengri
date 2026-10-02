@@ -18,6 +18,12 @@
 
 ### Fixed
 
+- `read_catalog`: a negative error marks an upper limit at the signed flux (any flux sign);
+  a flux or error below −9990, or an error of zero, masks the band and one `UserWarning`
+  per column lists the masked rows; a negative flux with a positive error is a detection
+  with its signed value; the `-1` lower-limit flag is the ingest path's (`catalog_ingest`),
+  never this reader's (#2586).
+
 - The dense-mass step-size stability probe (#1999) now also runs after
   adaptation in the dynamic-HMC backend and in `fit_batch`'s shared window
   adaptation, so those paths refuse a step above the metric's stability limit
