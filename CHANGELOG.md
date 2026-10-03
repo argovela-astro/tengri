@@ -51,6 +51,8 @@
 
 ### Added
 
+- `generate_mock(model, params, key, noise=sigma_obs)` draws each band from `N(flux_true, |sigma_obs|)` with the supplied per-band observed errors (CIGALE's `mock_flag` draw); `snr` is ignored when `noise` is given and the default is unchanged (#2628).
+
 - `WavePrecomp(igm_fold="exact")` and `"auto"` now fold the IGM exactly on a free redshift: the sub-band ratio is taken at every node of the photometry z-table, where it previously refused. Measured on a z = 6.5-7.5 bare-stellar model against `approx=None`, worst over bands with more than 5 % surviving flux: exact 0.42 % at `n_z=32` (1.6 % at 16), node fold 105 %. What remains is the triweight z-interpolation, so it shrinks with the z spacing. Bands redward of Ly-alpha skip the quadrature (their ratio is exactly one) and the table is content-cached beside the z-table in `~/.cache/tengri_precomp`, so the exact build costs about what the node build does.
 
 - `gordon03_smcbar`: Gordon et al. (2003) SMC Bar empirical extinction curve, tabulated and interpolated, normalized to k(5500 Å) = 1, alongside the existing `smc` (Pei 1992) and `prevot_smc` curves. Registered as a parameterless dust law repackaged from dust_extinction.averages.G03_SMCBar (#2528).
