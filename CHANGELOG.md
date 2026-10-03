@@ -120,6 +120,31 @@
   against pcigale, whose radio module is synchrotron only and whose nebular module owns the
   thermal continuum, set the rule.
 
+- The X-ray corona shape `(E/E_ref)^(1-Γ) × exp(−(E−E_ref)/E_cut)` equals 1 at E_ref = 2 keV with
+  the exponential cutoff included, so `L_ν(2 keV)` is the monochromatic luminosity of
+  Yang et al. 2020 Eq. 2 for every `E_cut` and Γ. The LMXB photon index default is 1.56
+  (Fabbiano 2006; Yang et al. 2020 Sect. 2.2.2), as in pcigale (#2583).
+
+- The X-ray block's HMXB and hot-gas terms scale with the SFR averaged over the last
+  100 Myr (`sfr_100myr`), the quantity the Lehmer et al. 2016 relations are calibrated on
+  (Yang et al. 2022, Sect. 3.3); the instantaneous SFR stands in only for an SFH that
+  publishes no 100 Myr average. The registered properties `log_l_x_xrb` and `log_l_x_agn`
+  are the 2-10 keV luminosities of the emitted HMXB + LMXB terms and of the emitted AGN
+  corona (absorber, scattered fraction and anisotropy included), published by the X-ray
+  component as `log_L_x_xrb_2_10` / `log_L_x_agn_2_10` in log10 space, so they equal the
+  band integral of `sed_xray`'s terms in float64 and float32. `log_l_x_agn` is `-inf`
+  without an AGN. `compute_log_l_x_xrb`, `compute_log_l_x_agn`, `compute_l_x_xrb` and
+  `compute_l_x_agn` (the 2.6e39·SFR and Duras relations, none re-exported at a public
+  `__init__`) are removed (#2582).
+
+- The `lopez24` corona is anchored to the 12 um nu L_nu of the AGN model itself. The
+  AGN component publishes `log_L_12um` and `log_L_6um` (dex re erg/s; disc + torus + polar
+  dust of the composable model, the whole SED of a monolithic one), and
+  `L(2-10 keV) = nu L_nu(12 um) / 10^alpha_IRX` is formed in log10 space, so the X-ray
+  wing is finite in pure float32. A model with no AGN has a zero corona, and the 0.07 L_bol
+  bolometric-correction anchor is removed together with `compute_l_12um_from_lbol`. `xray_agn_corona_lopez24` and
+  `xray_total_lopez24*` take `log_l_12um_erg` (dex) in place of `l_12um_erg_hz` (#2581).
+
 - Meiksin (2006) IGM: every Lyman-series optical depth (n = 2–30) is evaluated
   at its absorber redshift z_n = λ_obs/λ_n − 1, so the transmission blueward
   of Lyβ follows the paper's Table 2 (#2585).
