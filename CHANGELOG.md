@@ -94,6 +94,16 @@
 
 ### Fixed
 
+- The dust-IR band response, the radio and X-ray term responses, and the
+  energy-balance LUT of a redshift-reading attenuation law (`narayanan_z`)
+  followed a build-time redshift, so under `WavePrecomp(catalog_z_range=...)`,
+  where each galaxy evaluates at its own runtime redshift while the spec carries a
+  placeholder, catalog fits got 50-300% WISE W3/W4 errors (measured 0.50-0.98 in
+  W4 and 0.51-2.98 in W3 at z = 0.5-1.5 for `catalog_z_range=(0.05, 2)`). They
+  are now tabulated over the model's redshift range, uniform in ln(1+z), and read
+  at the evaluation redshift, so every catalog engine inherits them, and a
+  free-redshift model uses the fast path instead of falling back to the exact
+  per-call integral.
 - A dusty model whose nebular flux the per-Q_H grid serves (#2570) now takes the IGM at each nebular sub-band chunk's node rather than the band-averaged `<T>`: a two-component Cue model with dust emission at z = 7 read F090W 10.1 % off `approx=None` near Ly-alpha, now 0.94 % at worst over z = 6.5-7.3 (#2679).
 - Under `WavePrecomp` the IGM now reaches nebular, shock and AGN band fluxes through each component's own spectrum, `∫S·T/∫S` per band, instead of the band-averaged `<T>` alone, which formed `<S><T>`. Near Ly-alpha that was the dominant LUT error at high redshift: a Cue model at z = 7.3 read F115W +10.3 % and sdss_z +5.6 % against `approx=None` under the exact stellar fold; both are now 0.0000 %. The transmission is tabulated at build time over the absorbed end of the rest grid, and only for bands the IGM can reach in the model's redshift range, so a low-redshift model is unchanged bit for bit and pays nothing. Under the exact fold the stellar dust screen on the IGM-folded tensor is also evaluated where the IGM-surviving light sits: at the bare sub-band node a two-component model at z = 7 read sdss_z 8.7 % off, now 0.11 %. A composable AGN beside Cue reads <= 0.28 % (node fold 48 %).
 - The exact IGM fold now takes its sub-band ratio over the partition of the tensor it multiplies. A model with a live nebular Lyman-continuum mask (every Cue model: `neb_fesc` is fixed below one by default) splits each band into K + 1 chunks with a forced edge at 912 Å; the ratio was built as K + 1 equal-mass chunks without the edge, so shapes matched and nothing raised. Band fluxes straddling the Lyman limit were off by 12.7 % (GALEX NUV, z = 2) to 44 % (z = 2.5); a Cue model at z = 7.3 read i +11.6 % under the exact fold, now -1.2 %. The filter convention is passed through for the same reason.
