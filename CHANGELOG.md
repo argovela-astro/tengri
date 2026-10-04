@@ -87,6 +87,10 @@
 
 - The window LUT behind `measure_line_fluxes(approx=True)`, `predict_spectral_indices(approx=True)` and the line-flux loss channel applied the dust screen at each window center, where the exact path applies it across the window; a faint line beside a strong one (a small difference of two large window means) therefore disagreed by 13 % for [N II] 6584 next to Hα (and 5e-5 to 3e-4 for the other lines and indices). The LUT now keeps the SSP integrand per grid point and applies the screen there, so it equals the exact measurement to float rounding on every line and break/EW index (#2677).
 
+### Changed
+
+- Breaking: `Spectroscopy.resample` defaults to `"auto"` (was `"point"`), decided in the model's rest frame at the fixed (or lowest prior) redshift by one function that every spectrum path calls, including `spectrum_from_sfh`. Pixels wider than the model grid now return the pixel mean of the light after the line-spread function (the Gaussian LSF acts on the model grid, then the bin integral; a DESI resolution matrix still acts on the pixels): a sigma = 1 Å line in 2 Å pixels read +14 % at its centre when point-sampled. `Spectroscopy(resample="point")` restores the old values. `SpectrumPrecomp` raises on pixels wider than the model grid instead of warning; pixel-integral gradients in redshift are continuous (#2530).
+
 ### Added
 
 - `neb={'type': 'cue', 'nitrogen': ...}` selects the meaning of `gas_logno`: `'absolute'` (default, unchanged) is Cue's [N/O] input, and a relation name (`'nicholls17'`, the Nicholls+2017 two-regime N/O--O/H fit, `_default_nitrogen.py`) makes it the offset from that relation at the gas metallicity, as `neb_dno` is for the grid backends. Before, Cue's [N/O] stayed solar at every `neb_logZ_gas`, so [N II] 6584 / H-beta at 0.3 Z_sun was 2.2x CloudyGrid's; under `'nicholls17'` it is 0.88x (1.06x at Z_sun). The effective absolute [N/O] is published as the `log_no` property, the #2569 trained-range warning and narrowing bound it in both modes, and `nitrogen` on a non-Cue backend raises (#2693).
