@@ -845,6 +845,9 @@ def build_components(
                     sfr_mode=radio_sfr_mode,
                     agn_radio_model=radio_agn_model,
                     include_freefree=include_freefree,
+                    # q calibrates the total unless the user pinned ``freefree: False``,
+                    # which is the non-thermal (CIGALE) reading of q (#2590).
+                    q_is_total=radio_include_freefree is not False,
                     freefree_wave_min=freefree_wave_min,
                 ),
             )
