@@ -56,6 +56,10 @@ component goldens `astrodust.npy` (0.99%) and `draine2021_pah_ir.npy`
 
 `graybody.npy` — the closure no longer carries the optically-thin `(nu/nu_ref)^beta` factor on top of the general-opacity term; every other node of every other template unchanged.
 
+## Regenerated 2026-10-04 (#2708)
+
+`casey2012.npy` — emission is zero below 1 um and the shape is normalized on the evaluation grid after that mask. Nodes at 1 um and longer are scaled by one constant, 1.0002297314, relative to the previous file; the node below 1 um (1000 A) is zero. Every other template unchanged.
+
 ## Removed 2026-10-06 (schreiber2016 is the tabulated library)
 
 `schreiber2016.npy` captured the analytic modified-blackbody plus Drude stand-in, which no longer exists: `schreiber2016` is the tabulated Schreiber et al. (2018) library, whose expected values are mixed in the tests from the template arrays instead of frozen from the model's own output.

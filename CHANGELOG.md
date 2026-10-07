@@ -131,6 +131,15 @@
   A hand-built parameter dict passed to the radio component or to `tengri.pipeline` for
   the power-law model needs `radio_log_nu_cut` (13.0 is the declared default).
 
+- Casey (2012) dust emission emits from 1 µm rest-frame and longer, normalized
+  to L_absorbed on the supplied wavelength grid. The residual grid
+  dependence is first order in the width of the cell straddling 1 µm: below
+  1e-3 in L_nu(350 µm) on grids with cells of about 100 Å or finer there, and
+  about 1e-2 at α = 1 for a 1000 Å cell. The mid-IR power law has no finite blue limit as α → 1, so
+  emission below 1 µm is set to zero; without that bound the 250–500 µm band
+  flux at α = 1.0 on grids starting at 10 Å, 912 Å and 1 µm is 0.81, 1.29 and
+  1.86 times its value on a grid starting at 100 Å (#2708).
+
 - The NIFTy (`vi*`) and native (`native_vi_*`) variational engines score a photometric upper or lower limit (`data_mask` 1 / -1) as -ln Φ((F − m)/σ) or -ln Φ((m − F)/σ) like `map`, the samplers and `vi_fullrank`, with the limit bands entering the geoVI/MGVI metric as detections at their limit value; a free noise model together with a limit raises `ParameterError`. The NIFTy likelihood is built per `Fitter` and only the data-free physics is cached on the model, so a second `Fitter` on one model object fits its own data; the `hmc_is` evidence evaluation takes the data at call time, and the NIFTy free-noise likelihood passes free parameters only to the forward model (#2667, #2668).
 
 - The BAGPIPES reproduction compares tengri and BAGPIPES on matched inputs:
@@ -159,7 +168,7 @@
   limit flags (#2665, #2666).
 
 - **The tabulated Schreiber library mixed PAH by power, not by mass (#2597):** the standalone component unit-normalised the continuum and PAH templates separately before mixing, so its `f_pah` was a power fraction (a factor of about 3 in PAH power against the mass fraction CIGALE and Schreiber et al. 2018 define); templates are now mixed per kilogram and renormalised after mixing. (#2597)
-- The analytic dust precompute (`modified_blackbody`, `casey2012`, `graybody`) interpolates ln(band flux) with a monotone cubic Hermite (PCHIP) on nodes that span each parameter's declared prior, geometric in `dust_T` and `dust_lambda_0_um`. The nodes are band integrals of the closed-form model on a rest grid of 0.01 µm to 10 m, evaluated in batches, so a band from the far infrared to the radio reads the model's flux; a band whose rest-frame red edge lies beyond 10 m raises `ValueError`, and below 0.01 µm the template is taken as zero. The grid is stored as ln(band flux) taken in float64, so float32 values and gradients are finite. Against the exact closure at random points inside the declared priors, the maximum error at the default nodes is 3.5e-4 (`modified_blackbody`), 2.9e-4 (`graybody`) and 5.3e-4 (`casey2012`) in the 60-90, 250-500 and 750-950 µm bands at z = 0, and under 1e-3 in 250-500 and 750-950 µm at z = 3; `casey2012` at 8-24 µm is 2.7e-3 at z = 0, and at z = 3 it is 3.6e-3 in 60-90 µm and 6.8e-3 in 8-24 µm. The #2676 reproducer (T 47.3 K, β 1.65, λ₀ 130 µm) gives lookup/exact of 1.0000 in all three bands for all three models, where the old lookup was 4 % low to 10 % high, and 0.9999 / 0.9998 for 15 K dust in 8-24 µm, where it was 0.9-1.0 % high (#2676).
+- The analytic dust precompute (`modified_blackbody`, `casey2012`, `graybody`) interpolates ln(band flux) with a monotone cubic Hermite (PCHIP) on nodes that span each parameter's declared prior, geometric in `dust_T` and `dust_lambda_0_um`. The nodes are band integrals of the closed-form model on a rest grid of 0.01 µm to 10 m, evaluated in batches, so a band from the far infrared to the radio reads the model's flux; a band whose rest-frame red edge lies beyond 10 m raises `ValueError`, and below 0.01 µm the template is taken as zero. The grid is stored as ln(band flux) taken in float64, so float32 values and gradients are finite. Against the exact closure at random points inside the declared priors, the maximum error at the default nodes is 3.5e-4 (`modified_blackbody`), 2.9e-4 (`graybody`) and 8.0e-4 (`casey2012`, 60-90 µm; 6.7e-4 and 7.0e-4 in 250-500 and 750-950 µm) in the 60-90, 250-500 and 750-950 µm bands at z = 0, and under 1e-3 in 250-500 and 750-950 µm at z = 3; `casey2012` at 8-24 µm is 1.6e-3 at z = 0, and at z = 3 it is 2.0e-3 in 60-90 µm and 7.6e-4 in 8-24 µm. The 1 µm lower bound of `casey2012` is a node of the rest grid. The #2676 reproducer (T 47.3 K, β 1.65, λ₀ 130 µm) gives lookup/exact of 1.0000 in all three bands for all three models, where the old lookup was 4 % low to 10 % high, and 0.9999 / 0.9998 for 15 K dust in 8-24 µm, where it was 0.9-1.0 % high (#2676).
 
 - `fit_batch`'s shared vmap adaptation forwards the spec to the dense-mass
   gate (#2513). It was the one `resolve_dense_mass_gate` caller without

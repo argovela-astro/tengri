@@ -56,6 +56,11 @@ _X_MAX: float = 500.0
 # carried; this one clipped at 0.0 and could reach the pole (#1439).
 _X_MIN: float = 1e-10
 
+# casey2012 emission lower bound, a convention that follows the 1 um - 1 mm
+# range of CIGALE's casey2012 template. Casey (2012) sets no blue limit; the
+# bound removes the divergent blue tail of the mid-IR power law as alpha -> 1.
+_CASEY_LAMBDA_MIN_UM: float = 1.0
+
 
 def modified_blackbody(
     wavelength_aa: jnp.ndarray,
@@ -411,13 +416,23 @@ def casey2012(
     :math:`\lambda_c(\alpha, T)` from Eqs. 11-12. Every
     variable: :math:`T` = dust temperature [K], :math:`\beta` = emissivity
     index, :math:`\alpha` = mid-IR slope, :math:`\nu` = frequency [Hz],
-    :math:`\lambda` = wavelength. The total frequency integral is
-    normalized to ``L_absorbed``.
+    :math:`\lambda` = wavelength.
+
+    Emission range: 1 µm rest-frame and longer, a convention that follows
+    the 1 µm–1 mm range of CIGALE's template (Casey 2012 sets no blue limit;
+    near-sublimation dust peaks at 2–3 µm in :math:`\nu L_\nu`, so 1 µm is not
+    itself a sublimation wavelength). Normalized to ``L_absorbed`` on the
+    supplied wavelength grid. The residual grid dependence is first order in
+    the width of the grid cell that straddles 1 µm: below 1e-3 in L_nu(350 µm)
+    on grids with cells of about 100 Å or finer there, and about 1e-2 at
+    :math:`\alpha = 1` for a 1000 Å cell.
 
     This matches CIGALE's ``casey2012`` module term by term (parity
     verified against pcigale 2025.1; #1004: the previous closure carried
     a spurious Wien factor that annihilated the power law, an inverted
-    power-law slope, and an optically-thin-only graybody).
+    power-law slope, and an optically-thin-only graybody). CIGALE's casey2012
+    template is defined on 1 µm–1 mm; Synthesizer normalizes on the
+    supplied grid.
 
     When ``redshift > 0``, the dust temperature is corrected for CMB
     heating (da Cunha et al. 2013 [2]_) and the observed flux is reduced
@@ -489,7 +504,11 @@ def casey2012(
     )
     shape = graybody + power_law
 
-    # Normalize so integral over frequency = L_absorbed
+    # Mask emission below the lower bound
+    lambda_min_aa = _CASEY_LAMBDA_MIN_UM * 1e4
+    shape = jnp.where(wavelength_aa >= lambda_min_aa, shape, 0.0)
+
+    # Normalize so integral over frequency = L_absorbed on the supplied grid
     # nu is descending (wave ascending), negate for positive integral
     integral = -jnp.trapezoid(shape, nu)
     norm = jnp.where(integral > 0.0, L_absorbed / integral, 0.0)
