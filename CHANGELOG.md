@@ -204,6 +204,18 @@
 - `age_kernel='dsps'` gives the histogram kernel an SFR table refined 8-fold between SSP nodes; with one row per node the node containing the SFH onset lost its whole weight (delayed-tau, onset 5.0 Gyr: dsps/cic flux +2.32/+2.00/+1.48/+1.23 % in FUV/u/r/H, now -0.05/-0.06/-0.04/-0.03 %) and the flux jumped as the onset crossed a node. `dsps` outputs move; `cic` is unchanged for non-field models. Structure narrower than the node spacing raises `DSPSUnresolvedHistoryWarning` (#2683).
 
 - The window LUT behind `measure_line_fluxes(approx=True)`, `predict_spectral_indices(approx=True)` and the line-flux loss channel applied the dust screen at each window center, where the exact path applies it across the window; a faint line beside a strong one (a small difference of two large window means) therefore disagreed by 13 % for [N II] 6584 next to Hα (and 5e-5 to 3e-4 for the other lines and indices). The LUT now keeps the SSP integrand per grid point and applies the screen there, so it equals the exact measurement to float rounding on every line and break/EW index (#2677).
+- The analytic dust-emission precompute (`WavePrecomp` on `modified_blackbody`, `casey2012`,
+  `graybody`) built its node axes over the declared free prior (dust_T 20-80 K, dust_beta_ir
+  1-2.5, dust_alpha_mir 1-3, dust_lambda_0_um 50-500 um), and the lookup holds the edge value
+  with exactly zero gradient beyond the nodes. A widened prior (`dust_T: Uniform(10, 120)`) or a
+  `Fixed` value outside the declared range therefore gave a flat likelihood and no gradient over
+  the part the nodes did not reach, with nothing raised. The default axes now span the declared
+  range extended to what the model can reach, at the declared node density in the interpolation
+  coordinate (ln for dust_T and dust_lambda_0_um), so the #2676 accuracy carries over; with
+  default priors they are unchanged bit for bit. A supplied axis that does not cover that reach
+  raises `ValueError`, a supplied axis of fewer than 4 nodes warns (PCHIP degrades to a parabola
+  or a chord), and an unbounded prior (which cannot be spanned) emits one `GridSupportWarning`
+  (#2722).
 
 ### Changed
 
