@@ -154,6 +154,7 @@ class Rieke2009IRSEDComponent(EmissionComponent):
         wavelength_aa = jnp.asarray(templates["wavelength_aa"])
         flux_nu_relative = jnp.asarray(templates["flux_nu_relative"])
 
+        # Bound interpolation coordinates; zero is a valid endpoint, not a flux floor.
         position = jnp.clip(
             (p["log_L_ir_template"] - luminosity_axis[0])
             / (luminosity_axis[1] - luminosity_axis[0]),

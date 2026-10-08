@@ -114,7 +114,7 @@ class Haro11IRSEDComponent(EmissionComponent):
         References
         ----------
         .. [1] J. Lyu, G. H. Rieke, and S. Alberts, "The Contribution of Host
-           Galaxies to the Infrared Energy Output of z ≳ 5.0 Quasars," ApJ, 816,
+           Galaxies to the Infrared Energy Output of z\gtrsim5.0 Quasars," ApJ, 816,
            85 (2016). arXiv:1511.05938. https://doi.org/10.3847/0004-637X/816/2/85
         """
         del p
