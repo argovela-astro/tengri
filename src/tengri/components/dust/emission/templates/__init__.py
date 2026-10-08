@@ -46,6 +46,8 @@ from tengri.components.dust.emission.templates.draine_li import (
 from tengri.components.dust.emission.templates.schreiber2016 import (
     Schreiber2016IRSEDComponent,
 )
+from tengri.components.dust.emission.templates.haro11 import Haro11IRSEDComponent
+from tengri.components.dust.emission.templates.rieke2009 import Rieke2009IRSEDComponent
 from tengri.components.dust.emission.templates.schreiber2018 import (
     Schreiber2018IRSEDComponent,
 )
@@ -60,6 +62,8 @@ __all__ = [
     "DraineLi2007IRSEDComponent",
     "DraineLi2014IRSEDComponent",
     "Schreiber2016IRSEDComponent",
+    "Haro11IRSEDComponent",
+    "Rieke2009IRSEDComponent",
     "Schreiber2018IRSEDComponent",
     "ThemisIRSEDComponent",
 ]
